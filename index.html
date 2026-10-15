@@ -9620,5 +9620,86 @@ try{ poRender(); }catch(e){}
   })();
 
 </script>
+  <!-- ========== BOTÓN ENVIAR A N8N ========== -->
+<script>
+(function() {
+  // URL de PRODUCCIÓN de tu Webhook de n8n
+  const N8N_WEBHOOK = "https://millancamilo92.app.n8n.cloud/webhook/memoria-calculo-electrico";
+
+  function crearBotonEnviar() {
+    if (document.getElementById('btnEnviarN8N')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'btnEnviarN8N';
+    btn.innerHTML = '🚀 Generar Memoria Formal (n8n)';
+    btn.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+      background: linear-gradient(135deg, #1f5fd0, #5b90e6);
+      color: white;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(31,95,208,0.45);
+      transition: transform 0.15s;
+    `;
+    btn.onmouseover = () => btn.style.transform = 'scale(1.05)';
+    btn.onmouseout  = () => btn.style.transform = 'scale(1)';
+    btn.onclick = enviarDatosAN8N;
+    document.body.appendChild(btn);
+  }
+
+  async function enviarDatosAN8N() {
+    try {
+      const proyecto = JSON.parse(localStorage.getItem('suite_proyecto') || '{}');
+
+      const payload = {
+        origen: "Suite Eléctrica - Ing. Alexander Espinosa",
+        fecha_envio: new Date().toISOString(),
+        proyecto: proyecto
+      };
+
+      const btn = document.getElementById('btnEnviarN8N');
+      btn.innerHTML = '⏳ Enviando...';
+      btn.disabled = true;
+
+      const response = await fetch(N8N_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert('✅ Datos enviados correctamente a n8n.\nRevisa el workflow para ver la memoria generada.');
+      } else {
+        throw new Error('Error HTTP ' + response.status);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('❌ Error al enviar los datos:\n' + error.message + '\n\nVerifica que el workflow de n8n esté activo.');
+    } finally {
+      const btn = document.getElementById('btnEnviarN8N');
+      if (btn) {
+        btn.innerHTML = '🚀 Generar Memoria Formal (n8n)';
+        btn.disabled = false;
+      }
+    }
+  }
+
+  // Crear el botón
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', crearBotonEnviar);
+  } else {
+    crearBotonEnviar();
+  }
+  setTimeout(crearBotonEnviar, 2000);
+})();
+</script>
 </body>
 </html>
